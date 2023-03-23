@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css"
+		/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+        <script>
+            $(
+                function () {
+                    $.ajax({
+                        url: '/wallet',
+                        type: 'POST',
+                        success: function (response){
+                            $('#publicKey').val( response['publicKey'] );
+                            $('#privateKey').val( response['privateKey'] );
+                            $('#blockchainAddress').val( response['blockchainAddress'] );
+                            console.info(response);
+                        },
+                        error: function(err){
+                            console.error(err)
+                        }
+                    })
+
+                    $('#send-button').click(function () {
+                        let confirmText = 'Are You Sure?';
+                        let confirmResult = confirm(confirmText)
+                        if(!confirmResult){
+                            alert('Canceled')
+                            return
+                        }
+                        let transactionData = {
+                            'senderPrivateKey': $('#privateKey').val(),
+                            'senderPublicKey': $('#publicKey').val(),
+                            'senderBlockchainAddress': $('#blockchainAddress').val(),
+                            'recipientBlockchainAddress': $('#address').val(),
+                            'value': $('#amount').val(),
+                        };
+                        $.ajax({
+                        url: '/transaction',
+                        type: 'POST',
+                        contentType:'application/json',
+                        data:JSON.stringify(transactionData),
+                        success: function (response){
+                            alert('Transfer Success')
+                            console.info(response);
+                        },
+                        error: function(err){
+                            console.error(err)
+                        }
+                    })
+                    })
+                }
+            )
+        </script>
+		<title>Wallet</title>
+	</head>
+	<body>
+		<main class="container">
+			<article>
+				<header>
+					<hgroup>
+						<h3>Wallet</h3>
+						<h4>Funds: </h4>
+					</hgroup>
+					<a href="#" id="reload-wallet" role="button" class="outline">Reload Wallet</a>
+				</header>
+				<form>
+					<label for="publicKey">
+						Public Key
+						<input
+							type="text"
+							id="publicKey"
+							name="publicKey"
+							placeholder="..."
+							required
+						/>
+					</label>
+					<label for="privateKey">
+						Private Key
+						<input
+							type="text"
+							id="privateKey"
+							name="privateKey"
+							placeholder="..."
+							required
+						/>
+					</label>
+					<label for="blockchainAddress">
+						Blockchain Address
+						<input
+							type="text"
+							id="blockchainAddress"
+							name="blockchainAddress"
+							placeholder="..."
+							required
+						/>
+					</label>
+                    <h4>Send Tokens</h4>
+                    <label for="address">
+						Address
+						<input
+							type="text"
+							id="address"
+							name="address"
+							placeholder="..."
+							required
+						/>
+					</label>
+                    <label for="amount">
+						Amount
+						<input
+							type="text"
+							id="amount"
+							name="amount"
+							required
+						/>
+					</label>
+                    <button id="send-button">Send</button>
+				</form>
+			</article>
+		</main>
+	</body>
+</html>
